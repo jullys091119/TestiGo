@@ -952,6 +952,11 @@
     dotenv-expand "~11.0.6"
     getenv "^1.0.0"
 
+"@expo/html-elements@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.npmjs.org/@expo/html-elements/-/html-elements-0.4.2.tgz"
+  integrity sha512-lNioCgdtOrCMMqzHY+PCTdyuWBTU4yMBlOzPSkS4YFIWt9bq0zexM2ZJkpybTXmowNdE3zHO93xxAmiA2yDi2w==
+
 "@expo/image-utils@^0.5.0":
   version "0.5.1"
   resolved "https://registry.npmjs.org/@expo/image-utils/-/image-utils-0.5.1.tgz"
@@ -1135,10 +1140,26 @@
   dependencies:
     tslib "^2.7.0"
 
+"@gluestack-ui/avatar@^0.1.17":
+  version "0.1.17"
+  resolved "https://registry.npmjs.org/@gluestack-ui/avatar/-/avatar-0.1.17.tgz"
+  integrity sha512-L7R3GVjYK6o+tdCiCDZXvHjPi1FKwt9XAFHGlEsQ4dX6Qe7yWEi3K+e5UBpS1ugvja7SmNS+YZwvr+nnVcmohQ==
+  dependencies:
+    "@gluestack-ui/utils" "^0.1.12"
+
 "@gluestack-ui/hooks@0.1.11":
   version "0.1.11"
   resolved "https://registry.npmjs.org/@gluestack-ui/hooks/-/hooks-0.1.11.tgz"
   integrity sha512-bcBsF7bTo//JD6L9ekJu0rZs83qYD/pE/Uj3ih3OYEtGU0LDoYiGkBMmDRpVMcVv8bE3TCKivnhHaT/heafInA==
+
+"@gluestack-ui/image@^0.1.10":
+  version "0.1.10"
+  resolved "https://registry.npmjs.org/@gluestack-ui/image/-/image-0.1.10.tgz"
+  integrity sha512-RrWfA6PPyO7qkyH4gGPEp6YFkyQ9/4DvGHpuso0oVQeRpYGKb/ciJuIUryR1X1yoKZzrJZqMrO4lT4Uf/4mlsg==
+  dependencies:
+    "@gluestack-ui/utils" "^0.1.12"
+    "@react-native-aria/focus" "^0.2.9"
+    "@react-native-aria/interactions" "0.2.13"
 
 "@gluestack-ui/nativewind-utils@^1.0.25":
   version "1.0.25"
@@ -4932,6 +4953,11 @@ lru-cache@^6.0.0:
   integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   dependencies:
     yallist "^4.0.0"
+
+lucide-react-native@^0.453.0:
+  version "0.453.0"
+  resolved "https://registry.npmjs.org/lucide-react-native/-/lucide-react-native-0.453.0.tgz"
+  integrity sha512-pVeIjJUcRXL3362FfgIGd4IXyX+Ojj3s/cfDRTbpVGjkWnoFyMmvka9N7dbqmNJ08Yu3YzMHrrd7z1pvKeMWPA==
 
 make-dir@^2.0.0, make-dir@^2.1.0:
   version "2.1.0"
