@@ -1,22 +1,16 @@
 import "@/global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { StyleSheet, Text, View } from 'react-native';
-import Stacks from './stacks/stacks';
-
-
+import { NavigationContainer } from '@react-navigation/native'; // Importa NavigationContainer
+import StackScreens from "./navigations/Stacks";
+import { AppProvider } from "./context/context";
 export default function App() {
   return (
-    <GluestackUIProvider mode="light">
-        <Stacks/>
-    </GluestackUIProvider>
+    <AppProvider>
+      <NavigationContainer>
+        <GluestackUIProvider mode="light">
+          <StackScreens />
+        </GluestackUIProvider>
+      </NavigationContainer>
+    </AppProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'red',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

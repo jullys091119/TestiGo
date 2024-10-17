@@ -1,14 +1,17 @@
-import React from 'react'
+import React, {useContext,useState} from 'react';
+
 import { StyleSheet, ScrollView } from 'react-native';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
-import { AlignLeft, Plus, Heart, MessageCircle,ThumbsUp,Notebook } from 'lucide-react-native';
+import { AlignLeft, Plus, Heart, MessageCircle,ThumbsUp,Notebook,LogOut  } from 'lucide-react-native';
 import { Camera } from 'lucide-react-native';
 import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Card } from '@/components/ui/card';
 import { Image } from '@/components/ui/image';
+import { appContext } from '@/context/context';
+import { useNavigation } from '@react-navigation/native';
 
 import CameraHistories from './CameraHistories';
 
@@ -21,10 +24,22 @@ import {
 
 
 const Home = () => {
+
+  const {  LogoutUser } = useContext(appContext)
+  const navigation = useNavigation()
+
+  const handleLogout = async () =>  {
+    const status = await LogoutUser()
+     if(status === 200) {
+      navigation.navigate("Login")
+     }
+  }
+
   return (
     <>
       <HStack style={styles.container}>
-      <CameraHistories/>
+
+      {/* <CameraHistories/> */}
         <Box style={styles.header} className="h-20 w-20">
           <AlignLeft color="#3560a0" size={30} />
           <Avatar size="md" >
@@ -42,6 +57,10 @@ const Home = () => {
         <Heading size='4xl'>Feed</Heading>
       </Box>
       <Box>
+        <Box style={{marginHorizontal: 190}}>
+           <LogOut color="red" size={40} onPress={()=> handleLogout()} />
+
+        </Box>
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
           <Box style={styles.historiesContainer}>
             <Avatar size="xl">
