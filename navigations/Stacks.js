@@ -7,7 +7,9 @@ import { appContext } from '@/context/context';
 const Stack = createNativeStackNavigator();
 
 function StackScreens() {
+  
   const [tk, setTk] = useState(null)
+
   
   const getToken = async () => {
     try {
