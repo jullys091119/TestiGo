@@ -14,7 +14,8 @@ import CameraHistories from './CameraHistories';
 import { Avatar, AvatarBadge, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
 
 const Home = () => {
-  const { LogoutUser } = useContext(appContext);
+  const { LogoutUser,history } = useContext(appContext);
+  console.log(history, "history")
   const navigation = useNavigation();
   const [openHistories, setOpenHistories] = useState(false);
 
@@ -32,6 +33,7 @@ const Home = () => {
   const handleCloseHistories = () => {
     setOpenHistories(false);
   };
+
 
   useEffect(() => {
     const backAction = () => {
@@ -63,21 +65,24 @@ const Home = () => {
         <Heading size='4xl'>Feed</Heading>
       </Box>
       <Box>
-        <Box style={{ marginHorizontal: 190 }}>
-          <LogOut color="red" size={40} onPress={handleLogout} />
-        </Box>
+        
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-          <Box style={styles.historiesContainer}>
-            <TouchableOpacity onPress={handleOpenHistories}>
-              <Avatar size="xl">
-                <AvatarFallbackText>Jane Doe</AvatarFallbackText>
-                <AvatarImage source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80' }} />
-                <AvatarBadge size='2xl' style={styles.badge}>
-                  <Plus color="white" size={20} />
-                </AvatarBadge>
-              </Avatar>
-            </TouchableOpacity>
-          </Box>
+          {
+            history.map((item)=> {
+              return(
+                <Box style={styles.historiesContainer} key={item.id}>
+                  <TouchableOpacity onPress={handleOpenHistories}>
+                    <Avatar size="lg">
+                      <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + item.img.url }} />
+                      <AvatarBadge size='2xl' style={styles.badge}>
+                        <Plus color="white" size={20} />
+                      </AvatarBadge>
+                    </Avatar>
+                  </TouchableOpacity>
+                </Box>
+              )
+            })
+          }
         </ScrollView>
       </Box>
 
@@ -138,10 +143,10 @@ const styles = StyleSheet.create({
   },
   historiesContainer: {
     marginVertical: 20,
-    paddingHorizontal: 30,
+    paddingLeft:16,
     display: "flex",
     flexDirection: "row",
-    gap: 30,
+    gap: 10,
   },
   userContainer: {
     display: "flex",

@@ -1,11 +1,13 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useEffect, useState } from 'react';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SwitchCamera, Camera, Video, Circle } from 'lucide-react-native';
+import { SwitchCamera, Circle } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system';
 import { decode, encode } from 'base-64';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ImageResizer from 'react-native-image-resizer';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -37,19 +39,38 @@ export default function CameraHistories() {
   }
 
   const takePicture = async () => {
-    const idNode = await createNode(); // Captura el ID del nodo creado
     if (cameraRef) {
       try {
-        const photo = await cameraRef.takePictureAsync();
-        const base64 = await FileSystem.readAsStringAsync(photo.uri, {
+        const photo = await cameraRef.takePictureAsync({ quality: 0.5 }); // Toma la foto
+        const resizedUri = await resizeImage(photo.uri, 800, 600); // Redimensiona la imagen
+
+        // Si quieres leer la imagen como base64
+        const base64 = await FileSystem.readAsStringAsync(resizedUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        await uploadPictureUser(base64, idNode); // Sube la imagen
+
+        await uploadPictureUser(base64); // Llama a la función para subir la imagen
       } catch (error) {
         console.error('Error tomando la foto:', error);
       }
     }
   };
+
+  const resizeImage = async (uri, newWidth, newHeight, format = ImageManipulator.SaveFormat.JPEG, quality = 0.8) => {
+    try {
+      const result = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: newWidth, height: newHeight } }],
+        { compress: quality, format: format }
+      );
+      return result.uri; // La nueva URI de la imagen redimensionada
+    } catch (error) {
+      console.error('Error al redimensionar la imagen:', error);
+      throw error; // Propagar el error
+    }
+  };
+
+
 
   const createNode = async () => {
     const currentToken = await AsyncStorage.getItem("@TOKEN");
@@ -67,55 +88,63 @@ export default function CameraHistories() {
           "type": "node--histories_usuarios",
           "attributes": {
             "title": "Nueva historia",
-            "field_historia_texto_usuario": "nenenenennene",
+            "field_historia_texto_usuario": "Contenido de la historia",
           },
         },
       },
     };
-  
+
     try {
       const response = await axios.request(options);
-      console.log(response.data.drupal_internal__nid)
-      return response.data.drupal_internal__nid; // Retorna el ID del nodo creado
+      return response.data.data.id; // Retorna el ID del nodo creado
     } catch (error) {
       handleAxiosError(error);
     }
   };
 
-  const uploadPictureUser = async (base64Data, nodeId) => {
-    
-    const url = `https://elalfaylaomega.com/file/upload/node/${nodeId}/histories_usuarios/field_historia_imagen_usuario`;
 
+
+  const uploadPictureUser = async (base64Data) => {
+    await createNode()
+    const url = 'https://elalfaylaomega.com/congregacionelroble/jsonapi/node/histories_usuarios/field_historia_imagen_usuario';
+    // Convierte la imagen base64 en un ArrayBuffer
+    const binaryData = new Uint8Array(atob(base64Data).split('').map(char => char.charCodeAt(0)));
+    // Crea un objeto FormData para enviar la imagen como un archivo binario
     const formData = new FormData();
     formData.append('file', {
-      uri: `data:image/jpeg;base64,${base64Data}`,
-      type: 'image/jpeg',
-      name: `historia_${nodeId}.jpg`, // Cambia el nombre si es necesario
+      uri: 'data:application/octet-stream;base64,' + base64Data,
+      type: 'application/octet-stream',
+      name: `raton.jpg`
     });
 
+    // Agrega el encabezado "Content-Disposition" con el nombre de archivo
+    formData.append('Content-Disposition', 'attachment; filename="33.jpg"');
+    // Agrega los encabezados necesarios
     const headers = {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': 'Basic YWRtaW46cm9vdA==',
-    };
+      'Content-Type': 'application/octet-stream', // Cambiado a application/octet-stream
 
+      'Authorization': 'Basic Og==',
+      'Content-Disposition': `file; filename="nueva historia.jpg"`
+    };
     try {
+      const startTime = Date.now();
       const response = await fetch(url, {
         method: 'POST',
         headers,
-        body: formData,
+        body: binaryData, // Cambiado a binaryData
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Upload failed:', errorText);
-      } else {
-        const responseData = await response.json();
-        console.log('Imagen subida:', responseData);
-      }
+      const elapsedTime = Date.now() - startTime;
+      console.log(`Tiempo de carga: ${elapsedTime} ms`);
+      const responseData = await response.json();
+      console.log(responseData)
     } catch (error) {
-      console.error('Error al subir la imagen:', error);
+      console.error(error);
     }
-  };
+  }
+
+
+
+
 
   const handleAxiosError = (error) => {
     if (error.response) {
@@ -138,9 +167,6 @@ export default function CameraHistories() {
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takePicture}>
             <Circle color="white" size={60} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Video color="red" size={40} />
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -176,10 +202,5 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
   },
 });
