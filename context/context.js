@@ -9,6 +9,7 @@ const AppProvider = ({ children }) => {
 
     const [tk, setTk] = useState(null); // Cambia esto según lo que necesites
     const [logoutTk, setLogoutTk] = useState(null)
+    const [history, setHistory] = useState([])
 
 
     const LoginUser = async () => {
@@ -47,7 +48,7 @@ const AppProvider = ({ children }) => {
         try {
             const response = await axios.request(options);
            
-            console.log(response, "token exitoso");
+            // console.log(response, "token exitoso");
             await AsyncStorage.setItem("@TOKEN", response.data)
            
             
@@ -56,8 +57,45 @@ const AppProvider = ({ children }) => {
         }
     }
 
+    
+    const getHistories = async () => {
+        const options = {
+            method: 'GET',
+            url: `https://elalfaylaomega.com/congregacionelroble/jsonapi/file/file`, // Incluye csrf_token en la URL
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: {}, // Cuerpo vacío
+        };
+        try {
+            const response = await axios.request(options);
+            const histories = []; // Cambiamos a un array para acumular
+        
+            response.data.data.forEach(element => {
+                console.log(element.id)
+                histories.push({
+                    id:element.id,
+                    img: element.attributes.uri, // Asegúrate de que esto sea correcto
+                });
+            });
+        
+            setHistory(prev => [...prev, ...histories]); // Usa el spread operator para agregar múltiples elementos
+
+            return history
+        
+            // console.log(histories, "historias"); // Cambiamos a histories para ver todas las imágenes
+        } catch (error) {
+            console.error('Error en el logout:', error.response ? error.response.data : error.message);
+        }
+        
+
+    }
+
+
+
     useEffect(()=>{
       getToken()
+      getHistories()
     },[])
 
 
@@ -89,7 +127,8 @@ const AppProvider = ({ children }) => {
             LoginUser,
             LogoutUser,
             tk,
-            logoutTk
+            logoutTk,
+            history
 
         }}>
             {children}
