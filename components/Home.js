@@ -12,12 +12,14 @@ import { appContext } from '@/context/context';
 import { useNavigation } from '@react-navigation/native';
 import CameraHistories from './CameraHistories';
 import { Avatar, AvatarBadge, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
-  const { LogoutUser,history } = useContext(appContext);
-  console.log(history, "history")
+  const { LogoutUser, history, pickImagePerfil,imagePerfil,uploadPictureUserPerfil,   getStoragePictureImage } = useContext(appContext);
+  console.log(imagePerfil, "imageperfil")
   const navigation = useNavigation();
   const [openHistories, setOpenHistories] = useState(false);
+  const [picture, setPicture] = useState("")
 
   const handleLogout = async () => {
     const status = await LogoutUser();
@@ -34,7 +36,18 @@ const Home = () => {
     setOpenHistories(false);
   };
 
-
+  useEffect(()=>  {
+    const  getStoragePictureImage = async () => {
+      try {
+        const img =  await AsyncStorage.setItem("@PERFIL")
+        console.log(img, "obteniendo la imagen")
+      } catch (error) {
+        console.log(error, "problemas al ingresar imagen a storage")
+      }
+    }
+    getStoragePictureImage()
+  },[])
+ 
   useEffect(() => {
     const backAction = () => {
       if (openHistories) {
@@ -54,26 +67,37 @@ const Home = () => {
       <HStack style={styles.container}>
         <Box style={styles.header} className="h-20 w-20">
           <AlignLeft color="#3560a0" size={30} />
-          <Avatar size="md">
-            <AvatarFallbackText>Jane Doe</AvatarFallbackText>
-            <AvatarImage source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80' }} />
-            <AvatarBadge />
-          </Avatar>
+          <TouchableOpacity onPress={pickImagePerfil}>
+            <Avatar size="md">
+              <AvatarFallbackText>Jane Doe</AvatarFallbackText>
+              <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + imagePerfil }} />
+              <AvatarBadge />
+            </Avatar>
+          </TouchableOpacity>
         </Box>
       </HStack>
       <Box style={styles.heading}>
         <Heading size='4xl'>Feed</Heading>
       </Box>
       <Box>
-        
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity onPress={handleOpenHistories}  style={styles.historiesContainer} >
+            <Avatar size="lg">
+              <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + imagePerfil }} />
+              <AvatarBadge size='2xl' style={styles.badge}>
+                <Plus color="white" size={20} />
+              </AvatarBadge>
+            </Avatar>
+          </TouchableOpacity>
           {
-            history.map((item)=> {
-              return(
+            history.map((item, i) => {
+              //  console.log(item.img.included[i].attributes.uri.url, "item")
+              
+              return (
                 <Box style={styles.historiesContainer} key={item.id}>
                   <TouchableOpacity onPress={handleOpenHistories}>
                     <Avatar size="lg">
-                      <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + item.img.url }} />
+                      <AvatarImage source={{ uri: `https://elalfaylaomega.com/` + item.img.included[i].attributes.uri.url }} />
                       <AvatarBadge size='2xl' style={styles.badge}>
                         <Plus color="white" size={20} />
                       </AvatarBadge>
@@ -87,7 +111,7 @@ const Home = () => {
       </Box>
 
       {openHistories && <CameraHistories onClose={handleCloseHistories} />}
-      
+
       <Box style={styles.containerPublication}>
         <Box style={styles.userContainer}>
           <Avatar size="md">
@@ -143,7 +167,7 @@ const styles = StyleSheet.create({
   },
   historiesContainer: {
     marginVertical: 20,
-    paddingLeft:16,
+    paddingLeft: 16,
     display: "flex",
     flexDirection: "row",
     gap: 10,
