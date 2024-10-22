@@ -1,5 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
+import { appContext } from '@/context/context';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SwitchCamera, Circle } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system';
@@ -17,9 +18,11 @@ if (!global.atob) {
 }
 
 export default function CameraHistories() {
+  const  { setUpdateDom, uploadPictureUser,getHistories} = useContext(appContext)
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions(null);
   const [cameraRef, setCameraRef] = useState(null);
+  const [photo, setPhoto] = useState("")
 
   if (!permission) {
     return <View />;
@@ -39,9 +42,12 @@ export default function CameraHistories() {
   }
 
   const takePicture = async () => {
+     const id  = await createNode()
+    
     if (cameraRef) {
       try {
         const photo = await cameraRef.takePictureAsync({ quality: 0.5 }); // Toma la foto
+
         const resizedUri = await resizeImage(photo.uri, 800, 600); // Redimensiona la imagen
 
         // Si quieres leer la imagen como base64
@@ -49,7 +55,12 @@ export default function CameraHistories() {
           encoding: FileSystem.EncodingType.Base64,
         });
 
-        await uploadPictureUser(base64); // Llama a la función para subir la imagen
+
+        if(photo) {
+          await uploadPictureUser(base64,id); // Llama a la función para subir la imagen
+          setPhoto(photo)
+        }
+
       } catch (error) {
         console.error('Error tomando la foto:', error);
       }
@@ -69,8 +80,7 @@ export default function CameraHistories() {
       throw error; // Propagar el error
     }
   };
-
-
+ 
 
   const createNode = async () => {
     const currentToken = await AsyncStorage.getItem("@TOKEN");
@@ -102,61 +112,6 @@ export default function CameraHistories() {
     }
   };
 
-
-
-  const uploadPictureUser = async (base64Data) => {
-    await createNode()
-    const url = 'https://elalfaylaomega.com/congregacionelroble/jsonapi/node/histories_usuarios/field_historia_imagen_usuario';
-    // Convierte la imagen base64 en un ArrayBuffer
-    const binaryData = new Uint8Array(atob(base64Data).split('').map(char => char.charCodeAt(0)));
-    // Crea un objeto FormData para enviar la imagen como un archivo binario
-    const formData = new FormData();
-    formData.append('file', {
-      uri: 'data:application/octet-stream;base64,' + base64Data,
-      type: 'application/octet-stream',
-      name: `raton.jpg`
-    });
-
-    // Agrega el encabezado "Content-Disposition" con el nombre de archivo
-    formData.append('Content-Disposition', 'attachment; filename="33.jpg"');
-    // Agrega los encabezados necesarios
-    const headers = {
-      'Content-Type': 'application/octet-stream', // Cambiado a application/octet-stream
-
-      'Authorization': 'Basic Og==',
-      'Content-Disposition': `file; filename="nueva historia.jpg"`
-    };
-    try {
-      const startTime = Date.now();
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: binaryData, // Cambiado a binaryData
-      });
-      const elapsedTime = Date.now() - startTime;
-      console.log(`Tiempo de carga: ${elapsedTime} ms`);
-      const responseData = await response.json();
-      console.log(responseData)
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-
-
-
-
-  const handleAxiosError = (error) => {
-    if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
-    } else if (error.request) {
-      console.log(error.request);
-    } else {
-      console.log('Error', error.message);
-    }
-  };
 
   return (
     <View style={styles.container}>

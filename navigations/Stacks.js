@@ -16,7 +16,7 @@ function StackScreens() {
       const currentToken = await AsyncStorage.getItem("@TOKEN")
       if (currentToken) {
         setTk(currentToken)
-        console.log(currentToken, "current TOken")
+        // console.log(currentToken, "current TOken")
       }
 
     } catch (error) {

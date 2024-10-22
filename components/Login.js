@@ -12,7 +12,7 @@ const Login = ({ navigation }) => {
    
   const handleLogin = async () => {
     const status =  await LoginUser()
-    console.log(status, "status")
+    // console.log(status, "status")
     if(status === 200) {
       navigation.replace("Tabs") 
     }
