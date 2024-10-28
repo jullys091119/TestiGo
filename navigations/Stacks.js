@@ -16,7 +16,7 @@ function StackScreens() {
       const currentToken = await AsyncStorage.getItem("@TOKEN")
       if (currentToken) {
         setTk(currentToken)
-        // console.log(currentToken, "current TOken")
+         console.log(currentToken, "current TOken")
       }
 
     } catch (error) {
@@ -33,8 +33,8 @@ function StackScreens() {
     {
       !tk?(
         <>
-          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
           <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
+          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         </>
       ): (
         <>
