@@ -14,25 +14,36 @@ const AppProvider = ({ children }) => {
   const [updateDom, setUpdateDom] = useState({});
   const [imagePerfil, setImagePerfil] = useState("")
   const [picture, setPicture] = useState("")
+  const [tkLogout, setTkLogout]= useState("")
 
   const LoginUser = async () => {
     const options = {
       method: 'POST',
-      url: 'https://elalfaylaomega.com/congregacionelroble/user/login',
-      params: {format: 'json'},
-      headers: {
-        cookie: 'SSESSb2836ffed0f029445bc13c66737a631e=Ynr-ETn0WL7q1EhWfdsBtBHDqImC9BLy4tmWnyTh97Fn3V9R',
-        'Content-Type': 'application/json',
-        'User-Agent': 'insomnia/10.1.1'
-      },
-      data: {name: 'admin', pass: 'pass'}
+      url: 'https://elalfaylaomega.com/congregacionelroble/user/login?_format=json',
+      data: { name: 'admin', pass: 'pass' }
     };
-    
+
     return axios.request(options).then(function (response) {
-      console.log(response.data)
+      console.log(response.data.logout_token, "token logout")
+      AsyncStorage.setItem("@TOKEN_LOGOUT",response.data.logout_token)
       return response.status
     }).catch(function (error) {
-      console.error(error);
+      if (error.response) {
+        // La respuesta fue hecha y el servidor respondió con un código de estado
+        // que esta fuera del rango de 2xx
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        // La petición fue hecha pero no se recibió respuesta
+        // `error.request` es una instancia de XMLHttpRequest en el navegador y una instancia de
+        // http.ClientRequest en node.js
+        console.log(error.request);
+      } else {
+        // Algo paso al preparar la petición que lanzo un Error
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
     });
   };
 
@@ -58,7 +69,7 @@ const AppProvider = ({ children }) => {
           'Content-Type': 'application/json',
         }
       });
-      const  dataImg = response.data
+      const dataImg = response.data
       const histories = response.data.data.map(element => ({
         id: element.id,
         img: dataImg,
@@ -71,9 +82,9 @@ const AppProvider = ({ children }) => {
   };
 
 
-  const  setStoragePictureImage = (img) => {
+  const setStoragePictureImage = (img) => {
     console.log(img, "INg")
-    if(img !== undefined) {
+    if (img !== undefined) {
       try {
         AsyncStorage.setItem("@PERFIL", img)
       } catch (error) {
@@ -84,9 +95,9 @@ const AppProvider = ({ children }) => {
 
   const getStoragePictureImage = async () => {
     try {
-      const img =  await AsyncStorage.getItem("@PERFIL")
+      const img = await AsyncStorage.getItem("@PERFIL")
       setPicture(img)
-      console.log(img,"obteniendo la imagen para mostrarla")
+      console.log(img, "obteniendo la imagen para mostrarla")
     } catch (error) {
       console.log(error, "problemas al ingresar imagen a storage")
     }
@@ -138,13 +149,13 @@ const AppProvider = ({ children }) => {
       setImagePerfil(responseData.uri[0].url)
       setStoragePictureImage(responseData.uri[0].url)
       getStoragePictureImage()
-      return 
+      return
     } catch (error) {
       console.error(error);
     }
   }
 
-  
+
   //FUNCION SUBIR FOTO PARA OBTENER EL ID  Y HACER EL PATCH
   const uploadFile = async (base64Data) => {
     const url = 'https://elalfaylaomega.com/congregacionelroble/jsonapi/node/histories_usuarios/field_historia_imagen_usuario';
@@ -177,12 +188,12 @@ const AppProvider = ({ children }) => {
       const elapsedTime = Date.now() - startTime;
       // console.log(`Tiempo de carga: ${elapsedTime} ms`);
       const responseData = await response.json();
-       return responseData.data.id
+      return responseData.data.id
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   //FUNCION ASOCIAR IMAGEN A NODO Y ACTUALIZAR
   const uploadPictureUser = async (base64Data, nodeId) => {
     const tk = await AsyncStorage.getItem("@TOKEN");
@@ -226,27 +237,36 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  async function LogoutUser() {
+    const logout_token = await AsyncStorage.getItem("@TOKEN_LOGOUT")
 
-  //FUNCION DESLOGUEO
-  const LogoutUser = async () => {
     const options = {
-      method: 'POST',
-      url: `https://elalfaylaomega.com/congregacionelroble/user/logout`,
+      method: 'GET',
+      url: `https://elalfaylaomega.com/congregacionelroble/user/logout?token=${logout_token}`,
       headers: {
-        'Content-Type': 'application/json',
+        'User-Agent': 'insomnia/9.1.1',
+        'Content-Type': 'application/json'
       }
     };
+    
+    return axios.request(options).then(async function (response) {
+     
+      await AsyncStorage.removeItem("@TOKEN");
+      return response.status
+    }).catch(function (error) {
+      console.error(error);
+    });
+  }
 
-    try {
-      const response = await axios.request(options);
-      console.log(response.data, "Logout exitoso");
-      return response.status;
-    } catch (error) {
-      // console.error('Error en el logout:', error.response ? error.response.data : error.message);
-    }
-  };
 
   useEffect(() => {
+    try {
+      //  AsyncStorage.removeItem("@TOKEN")
+       console.log("token borrado")
+    } catch (error) {
+      
+    }
+   
     getToken();
     getHistories();
     getStoragePictureImage()

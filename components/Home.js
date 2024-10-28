@@ -24,8 +24,7 @@ const Home = () => {
 
   const handleLogout = async () => {
     const status = await LogoutUser();
-    console.log(status, "status logout")
-    await AsyncStorage.removeItem("@TOKEN");
+
     if (status === 200) {
       navigation.navigate("Login");
     }
