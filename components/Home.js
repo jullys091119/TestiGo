@@ -15,14 +15,17 @@ import { Avatar, AvatarBadge, AvatarFallbackText, AvatarImage } from '@/componen
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
-  const { LogoutUser, history, pickImagePerfil,imagePerfil,uploadPictureUserPerfil,   getStoragePictureImage } = useContext(appContext);
-  console.log(imagePerfil, "imageperfil")
+  const { LogoutUser, history, pickImagePerfil,imagePerfil,uploadPictureUserPerfil,picture } = useContext(appContext);
+
   const navigation = useNavigation();
   const [openHistories, setOpenHistories] = useState(false);
-  const [picture, setPicture] = useState("")
+ 
+ 
 
   const handleLogout = async () => {
     const status = await LogoutUser();
+    console.log(status, "status logout")
+    await AsyncStorage.removeItem("@TOKEN");
     if (status === 200) {
       navigation.navigate("Login");
     }
@@ -36,18 +39,7 @@ const Home = () => {
     setOpenHistories(false);
   };
 
-  useEffect(()=>  {
-    const  getStoragePictureImage = async () => {
-      try {
-        const img =  await AsyncStorage.setItem("@PERFIL")
-        console.log(img, "obteniendo la imagen")
-      } catch (error) {
-        console.log(error, "problemas al ingresar imagen a storage")
-      }
-    }
-    getStoragePictureImage()
-  },[])
- 
+  
   useEffect(() => {
     const backAction = () => {
       if (openHistories) {
@@ -70,20 +62,23 @@ const Home = () => {
           <TouchableOpacity onPress={pickImagePerfil}>
             <Avatar size="md">
               <AvatarFallbackText>Jane Doe</AvatarFallbackText>
-              <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + imagePerfil }} />
+              {picture && <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + picture }} />}
               <AvatarBadge />
             </Avatar>
           </TouchableOpacity>
         </Box>
       </HStack>
       <Box style={styles.heading}>
+      <TouchableOpacity onPress={handleLogout}>
+        <Text>Cerrar sesion</Text>
+        </TouchableOpacity>
         <Heading size='4xl'>Feed</Heading>
       </Box>
       <Box>
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
           <TouchableOpacity onPress={handleOpenHistories}  style={styles.historiesContainer} >
             <Avatar size="lg">
-              <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + imagePerfil }} />
+              {picture && <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + picture }} />}
               <AvatarBadge size='2xl' style={styles.badge}>
                 <Plus color="white" size={20} />
               </AvatarBadge>
@@ -116,7 +111,7 @@ const Home = () => {
         <Box style={styles.userContainer}>
           <Avatar size="md">
             <AvatarFallbackText>Jane Doe</AvatarFallbackText>
-            <AvatarImage source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80' }} />
+            {picture && <AvatarImage source={{ uri: 'https://elalfaylaomega.com/' + picture }} />}
           </Avatar>
           <VStack>
             <Heading size="sm">Ronald Richards</Heading>

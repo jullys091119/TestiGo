@@ -13,25 +13,27 @@ const AppProvider = ({ children }) => {
   const [history, setHistory] = useState([]);
   const [updateDom, setUpdateDom] = useState({});
   const [imagePerfil, setImagePerfil] = useState("")
+  const [picture, setPicture] = useState("")
 
   const LoginUser = async () => {
     const options = {
       method: 'POST',
       url: 'https://elalfaylaomega.com/congregacionelroble/user/login',
+      params: {format: 'json'},
       headers: {
+        cookie: 'SSESSb2836ffed0f029445bc13c66737a631e=Ynr-ETn0WL7q1EhWfdsBtBHDqImC9BLy4tmWnyTh97Fn3V9R',
         'Content-Type': 'application/json',
+        'User-Agent': 'insomnia/10.1.1'
       },
-      data: { name: "admin", pass: "pass" }
+      data: {name: 'admin', pass: 'pass'}
     };
-
-    try {
-      const response = await axios.request(options);
-      // console.log(response.status, "Login exitoso");
-      return response.status;
-    } catch (error) {
-      // console.log('Error en el login:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'Credenciales inválidas');
-    }
+    
+    return axios.request(options).then(function (response) {
+      console.log(response.data)
+      return response.status
+    }).catch(function (error) {
+      console.error(error);
+    });
   };
 
   const getToken = async () => {
@@ -70,17 +72,25 @@ const AppProvider = ({ children }) => {
 
 
   const  setStoragePictureImage = (img) => {
+    console.log(img, "INg")
+    if(img !== undefined) {
+      try {
+        AsyncStorage.setItem("@PERFIL", img)
+      } catch (error) {
+        console.log(error, "problemas al ingresar imagen a storagesss")
+      }
+    }
+  }
+
+  const getStoragePictureImage = async () => {
     try {
-      AsyncStorage.setItem("@PERFIL", img)
-      console.log(img, "ingresado a storage")
+      const img =  await AsyncStorage.getItem("@PERFIL")
+      setPicture(img)
+      console.log(img,"obteniendo la imagen para mostrarla")
     } catch (error) {
       console.log(error, "problemas al ingresar imagen a storage")
     }
   }
-
-
- 
-
 
 
   const pickImagePerfil = async () => {
@@ -127,6 +137,7 @@ const AppProvider = ({ children }) => {
       const responseData = await response.json();
       setImagePerfil(responseData.uri[0].url)
       setStoragePictureImage(responseData.uri[0].url)
+      getStoragePictureImage()
       return 
     } catch (error) {
       console.error(error);
@@ -134,8 +145,6 @@ const AppProvider = ({ children }) => {
   }
 
   
-
-
   //FUNCION SUBIR FOTO PARA OBTENER EL ID  Y HACER EL PATCH
   const uploadFile = async (base64Data) => {
     const url = 'https://elalfaylaomega.com/congregacionelroble/jsonapi/node/histories_usuarios/field_historia_imagen_usuario';
@@ -231,7 +240,6 @@ const AppProvider = ({ children }) => {
     try {
       const response = await axios.request(options);
       console.log(response.data, "Logout exitoso");
-      await AsyncStorage.removeItem("@TOKEN");
       return response.status;
     } catch (error) {
       // console.error('Error en el logout:', error.response ? error.response.data : error.message);
@@ -241,7 +249,7 @@ const AppProvider = ({ children }) => {
   useEffect(() => {
     getToken();
     getHistories();
-    
+    getStoragePictureImage()
   }, []);
 
   return (
@@ -257,6 +265,7 @@ const AppProvider = ({ children }) => {
       tk,
       logoutTk,
       history,
+      picture,
       pickImagePerfil
     }}>
       {children}
